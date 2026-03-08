@@ -63,7 +63,12 @@ async function fetchBananaPrice() {
 async function fetchDiamondPrice() {
   const data = await tryFetchJson(DIAMOND_INDEX_URL);
 
-  const price = Number(data?.dcx?.price_usd ?? data?.price_usd ?? data?.price);
+  const raw =
+    (typeof data?.dcx === "number" ? data.dcx : null) ??
+    data?.dcx?.price_usd ??
+    data?.price_usd ??
+    data?.price;
+  const price = Number(raw);
   const updated = data?.dcx?.updated_at ?? data?.updated_at ?? "";
 
   if (!Number.isFinite(price)) throw new Error("No diamond data");
@@ -79,25 +84,42 @@ function renderCompare(banana, diamond) {
   compareTextEl.textContent = `${usd(diamond.value)} is about ${ratio.toFixed(0)}x one banana benchmark unit (${usd(banana.value)}).`;
 }
 
+function renderError(el, msg) {
+  el.textContent = `Unavailable (${msg})`;
+}
+
 async function loadPrices() {
   bananaPriceEl.textContent = "Loading...";
+  bananaMetaEl.textContent = "";
   diamondPriceEl.textContent = "Loading...";
+  diamondMetaEl.textContent = "";
   compareTextEl.textContent = "Loading...";
 
-  try {
-    const [banana, diamond] = await Promise.all([fetchBananaPrice(), fetchDiamondPrice()]);
+  const [bananaRes, diamondRes] = await Promise.allSettled([fetchBananaPrice(), fetchDiamondPrice()]);
 
+  let banana = null;
+  let diamond = null;
+
+  if (bananaRes.status === "fulfilled") {
+    banana = bananaRes.value;
     bananaPriceEl.textContent = usd(banana.value);
     bananaMetaEl.textContent = `Latest banana datum: ${banana.date}`;
+  } else {
+    renderError(bananaPriceEl, bananaRes.reason?.message || "fetch failed");
+  }
 
+  if (diamondRes.status === "fulfilled") {
+    diamond = diamondRes.value;
     diamondPriceEl.textContent = usd(diamond.value);
     diamondMetaEl.textContent = diamond.date ? `Latest diamond datum: ${diamond.date}` : "Latest diamond datum: recent";
+  } else {
+    renderError(diamondPriceEl, diamondRes.reason?.message || "fetch failed");
+  }
 
+  if (banana && diamond) {
     renderCompare(banana, diamond);
-  } catch (err) {
-    bananaPriceEl.textContent = "Unavailable";
-    diamondPriceEl.textContent = "Unavailable";
-    compareTextEl.textContent = `Could not fetch live prices. ${err.message}`;
+  } else {
+    compareTextEl.textContent = "Comparison unavailable until both live prices load.";
   }
 }
 
