@@ -17,36 +17,34 @@ function usd(v) {
   }).format(v);
 }
 
-async function tryFetchJson(url) {
-  const direct = fetch(url).then((r) => {
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    return r.json();
-  });
-
-  const proxied = fetch(`${CORS_PROXY}${encodeURIComponent(url)}`).then((r) => {
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    return r.json();
-  });
-
-  return Promise.any([direct, proxied]);
+async function fetchJsonWithFallback(url) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (directErr) {
+    const proxiedUrl = `${CORS_PROXY}${encodeURIComponent(url)}`;
+    const res = await fetch(proxiedUrl);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  }
 }
 
-async function tryFetchText(url) {
-  const direct = fetch(url).then((r) => {
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    return r.text();
-  });
-
-  const proxied = fetch(`${CORS_PROXY}${encodeURIComponent(url)}`).then((r) => {
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    return r.text();
-  });
-
-  return Promise.any([direct, proxied]);
+async function fetchTextWithFallback(url) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.text();
+  } catch (directErr) {
+    const proxiedUrl = `${CORS_PROXY}${encodeURIComponent(url)}`;
+    const res = await fetch(proxiedUrl);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.text();
+  }
 }
 
 async function fetchBananaPrice() {
-  const csv = await tryFetchText(BANANA_CSV_URL);
+  const csv = await fetchTextWithFallback(BANANA_CSV_URL);
   const lines = csv.trim().split(/\r?\n/);
   const rows = lines.slice(1).map((line) => line.split(","));
   const valid = rows.filter((r) => r.length >= 2 && r[1] !== ".");
@@ -61,7 +59,7 @@ async function fetchBananaPrice() {
 }
 
 async function fetchDiamondPrice() {
-  const data = await tryFetchJson(DIAMOND_INDEX_URL);
+  const data = await fetchJsonWithFallback(DIAMOND_INDEX_URL);
 
   const raw =
     (typeof data?.dcx === "number" ? data.dcx : null) ??
