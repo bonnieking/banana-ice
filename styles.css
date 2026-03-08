@@ -1,0 +1,101 @@
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap");
+
+:root {
+  --yellow-bg: #fff6a8;
+  --yellow-card: #fff28a;
+  --yellow-accent: #ffe35d;
+  --ink: #101010;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Baloo 2", "Comic Sans MS", cursive;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 20% 10%, #fffbd0 0%, transparent 35%),
+    radial-gradient(circle at 85% 30%, #ffe97a 0%, transparent 42%),
+    var(--yellow-bg);
+}
+
+.wrap {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 1.25rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2.1rem, 8vw, 4rem);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.subtitle {
+  margin: 0.3rem 0 1rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.panel {
+  background: var(--yellow-card);
+  border: 4px solid var(--ink);
+  border-radius: 20px;
+  padding: 1rem;
+  box-shadow: 8px 8px 0 #000;
+}
+
+.row,
+.compare {
+  background: #fff8bf;
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  padding: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.45rem;
+  text-transform: uppercase;
+}
+
+.price {
+  margin: 0.1rem 0 0;
+  font-size: clamp(1.6rem, 7vw, 2.8rem);
+  font-weight: 800;
+}
+
+.meta,
+#compare-text,
+.footnote {
+  margin: 0.25rem 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+button {
+  width: 100%;
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  background: var(--yellow-accent);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1.1rem;
+  font-weight: 800;
+  padding: 0.6rem;
+  cursor: pointer;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+.footnote {
+  margin-top: 0.9rem;
+}
